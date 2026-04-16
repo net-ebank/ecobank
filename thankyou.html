@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Request Submitted</title>
+
+<style>
+:root {
+  --green: #7ED321;
+  --grey: #6E6E6E;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+/* Card */
+.container {
+  text-align: center;
+  max-width: 400px;
+  padding: 30px 20px;
+}
+
+/* Check animation */
+.checkmark {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--green);
+  margin: 0 auto 20px;
+  position: relative;
+  animation: pop 0.4s ease;
+}
+
+.checkmark::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 38px;
+  width: 20px;
+  height: 10px;
+  border-left: 4px solid var(--green);
+  border-bottom: 4px solid var(--green);
+  transform: rotate(-45deg);
+}
+
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+p {
+  color: var(--grey);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Button */
+button {
+  margin-top: 25px;
+  padding: 14px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background: var(--green);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="checkmark"></div>
+
+  <h2>Request Submitted</h2>
+
+  <p>
+    Your request has been received and is being processed.<br>
+    You will receive an update shortly.
+  </p>
+
+  <button onclick="window.location.href='index.html'">
+    Back to Home
+  </button>
+
+</div>
+
+</body>
+</html>
